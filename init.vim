@@ -34,18 +34,36 @@ let g:coc_global_extensions = [
 "Syntax format for jsx
 Plug 'maxmellon/vim-jsx-pretty'
 
+"" Auto close/match brackets
+Plug 'Raimondi/delimitMate'
+
 "Syntax support for graphql
 Plug 'jparise/vim-graphql'
 
 "Search
-Plug 'junegunn/fzf'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'yuki-ycino/fzf-preview.vim', { 'branch': 'release/rpc' }
 
 " Beautiful Dark theme
 Plug 'gruvbox-community/gruvbox'
 Plug 'gruvbox-material/vim', {'as': 'gruvbox-material'}
 
 Plug 'ryanoasis/vim-devicons'
+
+
+"" Git integration
+" Leader-g = Open Line on Git (browser)
+" Leader-gf = List GitFiles
+" Leader-gt  = Show GitStatus
+" Leader-gm  = Show Git Commit Message for Line
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rhubarb' " required by fugitive to :Gbrowse
+Plug 'airblade/vim-gitgutter'
+Plug 'rhysd/git-messenger.vim'
+Plug 'stsewd/fzf-checkout.vim' " The  Primeagen told me to install it.
+" C-n (new-branch), C-d (del), C-e (Merge),
+" C-r (rebase)
 
 Plug 'sheerun/vim-polyglot'
 
@@ -88,10 +106,6 @@ set vb
 set smartindent
 highlight LineNr term=bold cterm=NONE ctermfg=DarkGrey ctermbg=235 gui=NONE guifg=NONE guibg=NONE
 set clipboard=unnamed,unnamedplus
-
-" Auto indent pasted text
-nnoremap p p=`]<C-o>
-nnoremap P P=`]<C-o>
 
 if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
   let g:coc_global_extensions += ['coc-prettier']
@@ -226,7 +240,7 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
 " Git Stuff
-nnoremap <leader>gc :GBranches<CR>
+nnoremap <leader>gb :GBranches<CR>
 nnoremap <leader>ga :Git fetch --all<CR>
 nnoremap <leader>grum :Git rebase upstream/master<CR>
 nnoremap <leader>grom :Git rebase origin/master<CR>
@@ -269,6 +283,12 @@ autocmd BufNewFile,BufRead *.yaml.hbs   set syntax=ansible
 autocmd BufNewFile,BufRead *.jsx set filetype=javascript.jsx
 
 set t_Co=256
+
+
+if exists("*fugitive#statusline")
+  set statusline+=%{fugitive#statusline()}
+endif
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "" Appearance
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -292,3 +312,4 @@ let g:airline_skip_empty_sections = 1
 
 " Generate UUID
 nnoremap <leader>id :read !uuidgen<esc>k :join<esc>
+
