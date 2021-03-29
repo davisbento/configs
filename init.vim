@@ -14,8 +14,11 @@ Plug 'tpope/vim-unimpaired'
 Plug 'isRuslan/vim-es6'
 Plug 'bling/vim-airline'
 
-"Themes
+"" Status and tab bar
+Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+
+Plug 'alvan/vim-closetag'
 
 "Plug 'pangloss/vim-javascript'
 Plug 'othree/yajs.vim', {'for': 'javascript'}
@@ -24,6 +27,9 @@ Plug 'pearofducks/ansible-vim'
 "Plug 'HerringtonDarkholme/yats.vim'
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+let g:coc_global_extensions = [
+  \ 'coc-tsserver'
+  \ ]
 
 "Syntax format for jsx
 Plug 'maxmellon/vim-jsx-pretty'
@@ -35,8 +41,9 @@ Plug 'jparise/vim-graphql'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 
-"Onedark theme
-Plug 'joshdick/onedark.vim'
+" Beautiful Dark theme
+Plug 'gruvbox-community/gruvbox'
+Plug 'gruvbox-material/vim', {'as': 'gruvbox-material'}
 
 Plug 'ryanoasis/vim-devicons'
 
@@ -51,9 +58,6 @@ let g:airline_right_sep = ''
 " vim javascript
 let g:javascript_plugin_jsdoc = 1
 let g:javascript_plugin_ngdoc = 1
-
-" ctrlp ignore folders
-let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
 
 filetype plugin indent on    " required
 
@@ -88,6 +92,14 @@ set clipboard=unnamed,unnamedplus
 " Auto indent pasted text
 nnoremap p p=`]<C-o>
 nnoremap P P=`]<C-o>
+
+if isdirectory('./node_modules') && isdirectory('./node_modules/prettier')
+  let g:coc_global_extensions += ['coc-prettier']
+endif
+
+if isdirectory('./node_modules') && isdirectory('./node_modules/eslint')
+  let g:coc_global_extensions += ['coc-eslint']
+endif
 
 " Display tabs and trailing spaces visually
 set list listchars=tab:\ \ ,trail:·
@@ -134,23 +146,65 @@ set noswapfile
 set nobackup
 set nowb
 
-" CtrlP to ignore
-set wildignore+=*.swp,*.pyc
-let g:ctrlp_show_hidden = 1
-
-" NerdTree show hidden files
-let NERDTreeShowHidden=1
-let NERDTreeIgnore=['\.swp$', '\.pyc$']
-
 " Short cuts:
 let mapleader=","
-map ; :Files<CR>
-map <C-]> :NERDTreeToggle<CR>
+
+let g:mkdp_auto_start = 0       " Don't open md preview automatically
+let g:mkdp_auto_close = 0       " Don't close md preview automatically
+
+let g:session_directory = "~/.config/nvim/session" " Session saving
+let g:session_autoload = "no"
+let g:session_autosave = "no"
+let g:session_command_aliases = 1
+
+let g:indentLine_enabled = 1    " Enables indentline plugin
+let g:indentLine_concealcursor = 0
+let g:indentLine_char = '┆'
+let g:indentLine_char_list = ['|', '¦', '┆', '┊']
+let g:indentLine_faster = 1
+
+
+" filenames like *.xml, *.html, *.xhtml, ...
+" These are the file extensions where this plugin is enabled.
+"
+let g:closetag_filenames = '*.html,*.xhtml,*.phtml,*.tsx,*.jsx'
+
+" filenames like *.xml, *.xhtml, ...
+" This will make the list of non-closing tags self-closing in the specified files.
+"
+let g:closetag_xhtml_filenames = '*.xhtml,*.jsx,*.tsx'
+
+let g:closetag_xhtml_filetypes = 'xhtml,javascript.jsx,jsx,tsx'
+
+" integer value [0|1]
+" This will make the list of non-closing tags case-sensitive (e.g. `<Link>` will be closed while `<link>` won't.)
+"
+let g:closetag_emptyTags_caseSensitive = 1
+
+" Shortcut for closing tags, default is '>'
+"
+let g:closetag_shortcut = '>'
+
+" FZF and Rg settings for search
+set wildmode=list:longest,list:full
+set wildignore+=*.o,*.obj,.git,*.rbc,*.pyc,__pycache__
+let $FZF_DEFAULT_COMMAND =  "find * -path '*/\.*' -prune -o -path 'node_modules/**' -prune -o -path 'target/**' -prune -o -path 'dist/**' -prune -o  -type f -print -o -type l -print 2> /dev/null"
+if executable('rg')
+  let g:rg_derive_root='true'
+  let $FZF_DEFAULT_COMMAND = 'rg --files --hidden --follow --glob "!.git/*"'
+  set grepprg=rg\ --vimgrep
+  command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>).'| tr -d "\017"', 1, <bang>0)
+endif
+
+"" Uncomment below to show :Rg in a popup
+" let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.8 } }
+let $FZF_DEFAULT_OPTS='--reverse'
+
+map <C-B> :NERDTreeToggle<CR>
 map <C-F> :NERDTreeFind<CR>         " Open NERDTree and focus on current file
 map <F5> :e!<CR>                    " force reload current file
-map <F6> :CtrlPClearAllCaches<CR>   " clear all CtrlP cache
-map <leader>W :w<CR>
-map <leader>w :wincmd k<CR>        " go window up
+map <leader>W :weslint.executeAutofix<CR>
+map <leader>w :w<CR>               " save current buffer
 map <leader>s :wincmd j<CR>        " go window down
 map <leader>a :wincmd h<CR>        " go window left
 map <leader>d :wincmd l<CR>        " go window right
@@ -162,58 +216,79 @@ map <leader>n :tabnew<CR>          " create a new tab
 map <leader>z :tabprevious<CR>     " move to previous tab
 map <leader>x :tabnext<CR>         " move to next tab
 map <leader>y :call system('xclip -selection clipboard', @0)<CR>  " move last yank selection to xclip
-map <leader>b :CtrlPBuffer<cr>
-map <leader>t :CtrlPTag<cr>
 "nmap <ESC> :call coc#util#float_hide() <CR>
 nmap <silent> k :call CocAction('doHover')<CR>
+nmap <leader>do <Plug>(coc-codeaction)
 "autocmd CursorHold * silent call CocActionAsync('doHover')
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 
+" Git Stuff
+nnoremap <leader>gc :GBranches<CR>
+nnoremap <leader>ga :Git fetch --all<CR>
+nnoremap <leader>grum :Git rebase upstream/master<CR>
+nnoremap <leader>grom :Git rebase origin/master<CR>
+
+" Get Help for Word
+nnoremap <leader>ghw :h <C-R>=expand("<cword>")<CR><CR>
+
+" Preview Refactor on Word
+nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
+
+" Preview Search
+nnoremap <Leader>r :Rg<CR>
+
+" Preview Search Word
+nnoremap <leader>pw :Rg <C-R>=expand("<cword>")<CR><CR>
+
+" Git Files
+nnoremap <Leader>gf :GFiles<CR>
+
+" Git Status
+nnoremap <Leader>gt :GFiles?<CR>
+
+" Local Directory Files
+nnoremap <Leader>f :Files<CR>
+
+" File History
+nnoremap <Leader>hf :History<CR>
+
+" Search History
+nnoremap <Leader>hse :History/<CR>
+
+"Commands History
+nnoremap <leader>hc :History:<CR>
+
+" Search the current file with preview
+nnoremap <leader>s :BLines<CR>
+nnoremap <leader>l :Lines<CR>
+
 autocmd BufNewFile,BufRead *.yaml.hbs   set syntax=ansible
+autocmd BufNewFile,BufRead *.jsx set filetype=javascript.jsx
 
 set t_Co=256
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"" Appearance
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let g:gruvbox_contrast_dark = 'hard'       " Set gruvbox bg to real dark
+let g:gruvbox_material_background = 'hard' " Same but for -material alt
+let g:gruvbox_invert_selection='0'         " Don't invert selection
+set background=dark                        " Set global background to dark
+colorscheme gruvbox-material               " Default colorscheme
 
-if exists('$TMUX')
-  " Colors in tmux
-  let &t_8f = "<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b = "<Esc>[48;2;%lu;%lu;%lum"
-endif
+let g:airline_theme = 'gruvbox_material'
+let g:airline#extensions#branch#enabled = 1
+let g:airline#extensions#ale#enabled = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tagbar#enabled = 1
+let g:airline#extensions#virtualenv#enabled = 1
+let g:airline_skip_empty_sections = 1
 
-"set background=dark
-let g:airline_theme='onedark'
+""""
+"" Helpers
+""""
 
-"Onedark theme
-let g:onedark_termcolors=256
-let g:onedark_terminal_italics=1
-let g:onedark_hide_endofbuffer=1
-let g:onedark_color_overrides = {
-      \ "purple": { "gui": "#56B6C2", "cterm": "170", "cterm16": "5" }
-      \}
-syntax enable
-colorscheme onedark
-
-set guifont=FiraCode_Nerd_Font:h11
-let g:airline_powerline_fonts = 1
-
-if (has("termguicolors"))
- set termguicolors
-endif
-
-"Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
-"If you're using tmux version 2.2 or later, you can remove the outermost $TMUX check and use tmux's 24-bit color support
-"(see < http://sunaku.github.io/tmux-24bit-color.html#usage > for more information.)
-if (empty($TMUX))
-  if (has("nvim"))
-    "For Neovim 0.1.3 and 0.1.4 < https://github.com/neovim/neovim/pull/2198 >
-    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-  endif
-  "For Neovim > 0.1.5 and Vim > patch 7.4.1799 < https://github.com/vim/vim/commit/61be73bb0f965a895bfb064ea3e55476ac175162 >
-  "Based on Vim patch 7.4.1770 (`guicolors` option) < https://github.com/vim/vim/commit/8a633e3427b47286869aa4b96f2bfc1fe65b25cd >
-  " < https://github.com/neovim/neovim/wiki/Following-HEAD#20160511 >
-  if (has("termguicolors"))
-    set termguicolors
-  endif
-endif
+" Generate UUID
+nnoremap <leader>id :read !uuidgen<esc>k :join<esc>
