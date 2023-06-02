@@ -13,6 +13,7 @@ Plug 'tmux-plugins/vim-tmux'
 Plug 'tpope/vim-unimpaired'
 Plug 'isRuslan/vim-es6'
 Plug 'bling/vim-airline'
+Plug 'github/copilot.vim'
 
 "" Status and tab bar
 Plug 'vim-airline/vim-airline'
@@ -46,8 +47,7 @@ Plug 'junegunn/fzf.vim'
 Plug 'yuki-ycino/fzf-preview.vim', { 'branch': 'release/rpc' }
 
 " Beautiful Dark theme
-Plug 'gruvbox-community/gruvbox'
-Plug 'gruvbox-material/vim', {'as': 'gruvbox-material'}
+Plug 'folke/tokyonight.nvim'
 
 Plug 'ryanoasis/vim-devicons'
 
@@ -231,13 +231,16 @@ map <leader>z :tabprevious<CR>     " move to previous tab
 map <leader>x :tabnext<CR>         " move to next tab
 map <leader>y :call system('xclip -selection clipboard', @0)<CR>  " move last yank selection to xclip
 "nmap <ESC> :call coc#util#float_hide() <CR>
-nmap <silent> k :call CocAction('doHover')<CR>
+nmap <silent>e :call CocAction('doHover')<CR>
 nmap <leader>do <Plug>(coc-codeaction)
 "autocmd CursorHold * silent call CocActionAsync('doHover')
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <silent>rr <Plug>(coc-rename)
+
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
 " Git Stuff
 nnoremap <leader>gb :GBranches<CR>
@@ -253,6 +256,9 @@ nnoremap <leader>prw :CocSearch <C-R>=expand("<cword>")<CR><CR>
 
 " Preview Search
 nnoremap <Leader>r :Rg<CR>
+
+:nnoremap <Tab> :bnext<CR>
+:nnoremap <S-Tab> :bprevious<CR>
 
 " Preview Search Word
 nnoremap <leader>pw :Rg <C-R>=expand("<cword>")<CR><CR>
@@ -292,13 +298,11 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "" Appearance
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-let g:gruvbox_contrast_dark = 'hard'       " Set gruvbox bg to real dark
-let g:gruvbox_material_background = 'hard' " Same but for -material alt
-let g:gruvbox_invert_selection='0'         " Don't invert selection
 set background=dark                        " Set global background to dark
-colorscheme gruvbox-material               " Default colorscheme
+colorscheme tokyonight-night               " Default colorscheme
 
-let g:airline_theme = 'gruvbox_material'
+let g:airline_theme = 'solarized'
+let g:airline_solarized_bg = 'dark'
 let g:airline#extensions#branch#enabled = 1
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
@@ -312,4 +316,3 @@ let g:airline_skip_empty_sections = 1
 
 " Generate UUID
 nnoremap <leader>id :read !uuidgen<esc>k :join<esc>
-
